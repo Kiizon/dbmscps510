@@ -185,7 +185,7 @@ function displayPlayerProfile(data) {
             const mmrClass = match.mmr_delta >= 0 ? 'positive' : 'negative';
             const mmrSign = match.mmr_delta >= 0 ? '+' : '';
             html += `
-                <div class="match-card ${match.result}">
+                <div class="match-card ${match.result}" onclick="viewMatchDetails(${match.match_id})">
                     <div class="match-info">
                         <div class="match-character">${match.character_name}</div>
                         <div class="match-result">${match.result}</div>
@@ -193,6 +193,7 @@ function displayPlayerProfile(data) {
                         <div class="match-details">${match.gamemode} • ${match.started_at}</div>
                     </div>
                     <div class="match-mmr ${mmrClass}">${mmrSign}${match.mmr_delta} MMR</div>
+                    <div class="match-expand-hint">Click for details →</div>
                 </div>
             `;
         });
@@ -210,6 +211,82 @@ function displayPlayerProfile(data) {
     container.innerHTML = html;
 }
 
+// ============= MATCH DETAILS =============
+
+async function viewMatchDetails(matchId) {
+    const result = await apiGet(`/match/${matchId}/details`);
+    if (!result) return;
+    
+    displayMatchModal(result);
+}
+
+function displayMatchModal(data) {
+    const match = data.match;
+    const players = data.players;
+    
+    // Group players by team
+    const teamMap = {};
+    players.forEach(p => {
+        if (!teamMap[p.team_label]) {
+            teamMap[p.team_label] = [];
+        }
+        teamMap[p.team_label].push(p);
+    });
+    
+    let html = `
+        <div class="match-modal-header">
+            <h3>Match ${match.match_id} - ${match.gamemode}</h3>
+            <p>${match.started_at} - ${match.ended_at || 'In Progress'}</p>
+            <button class="modal-close" onclick="closeMatchModal()">×</button>
+        </div>
+        <div class="match-modal-content">
+    `;
+    
+    // Display teams
+    for (const [teamLabel, teamPlayers] of Object.entries(teamMap)) {
+        const teamResult = teamPlayers[0].result;
+        html += `
+            <div class="team-section ${teamResult}">
+                <h4>Team ${teamLabel} - ${teamResult.toUpperCase()}</h4>
+                <div class="team-players">
+        `;
+        
+        teamPlayers.forEach(p => {
+            const kda = p.kills !== undefined 
+                ? `${p.kills}/${p.deaths}/${p.assists}` 
+                : 'N/A';
+            html += `
+                <div class="modal-player-card">
+                    <div class="modal-player-name" onclick="viewPlayerProfile(${p.player_id})">${p.display_name}</div>
+                    <div class="modal-player-character">${p.character_name}</div>
+                    <div class="modal-player-stats">
+                        <span><strong>KDA:</strong> ${kda}</span>
+                        ${p.damage_dealt !== undefined ? `<span><strong>Damage:</strong> ${p.damage_dealt}</span>` : ''}
+                        ${p.healing_done !== undefined && p.healing_done > 0 ? `<span><strong>Healing:</strong> ${p.healing_done}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `</div>`;
+    
+    // Show modal
+    const modal = document.getElementById('matchModal');
+    const modalContent = document.getElementById('matchModalContent');
+    modalContent.innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+function closeMatchModal() {
+    document.getElementById('matchModal').style.display = 'none';
+}
+
 // ============= EVENT LISTENERS =============
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -220,6 +297,20 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('playerSearch').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             searchPlayers();
+        }
+    });
+    
+    // Close modal when clicking outside
+    document.getElementById('matchModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeMatchModal();
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeMatchModal();
         }
     });
 });

@@ -294,6 +294,28 @@ body {
     justify-content: space-between;
     align-items: center;
     border-left: 5px solid #e2e8f0;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.match-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.match-expand-hint {
+    position: absolute;
+    bottom: 5px;
+    right: 15px;
+    font-size: 0.85em;
+    color: #667eea;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.match-card:hover .match-expand-hint {
+    opacity: 1;
 }
 
 .match-card.win {
@@ -386,6 +408,157 @@ body {
     text-align: center;
 }
 
+/* Match Details Modal */
+.match-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 20px;
+}
+
+.match-modal-container {
+    background: white;
+    border-radius: 16px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.match-modal-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 30px;
+    border-radius: 16px 16px 0 0;
+    position: relative;
+}
+
+.match-modal-header h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.8em;
+}
+
+.match-modal-header p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    font-size: 2em;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.modal-close:hover {
+    background: rgba(255,255,255,0.3);
+    transform: rotate(90deg);
+}
+
+.match-modal-content {
+    padding: 30px;
+}
+
+.team-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+}
+
+.team-section.win {
+    background: linear-gradient(to right, #f0fff4 0%, white 100%);
+    border-color: #48bb78;
+}
+
+.team-section.loss {
+    background: linear-gradient(to right, #fff5f5 0%, white 100%);
+    border-color: #f56565;
+}
+
+.team-section h4 {
+    margin: 0 0 20px 0;
+    font-size: 1.4em;
+    color: #2d3748;
+}
+
+.team-section.win h4 {
+    color: #38a169;
+}
+
+.team-section.loss h4 {
+    color: #e53e3e;
+}
+
+.team-players {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.modal-player-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s;
+}
+
+.modal-player-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102,126,234,0.15);
+}
+
+.modal-player-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+
+.modal-player-name:hover {
+    text-decoration: underline;
+}
+
+.modal-player-character {
+    font-size: 0.95em;
+    color: #718096;
+    margin-bottom: 10px;
+}
+
+.modal-player-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.9em;
+    color: #4a5568;
+}
+
+.modal-player-stats span {
+    display: flex;
+    justify-content: space-between;
+}
+
 /* Toast */
 .toast {
     position: fixed;
@@ -400,7 +573,7 @@ body {
     transform: translateY(30px);
     transition: all 0.4s ease;
     pointer-events: none;
-    z-index: 1000;
+    z-index: 3000;
     font-weight: 500;
 }
 
