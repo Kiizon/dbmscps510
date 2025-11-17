@@ -30,6 +30,9 @@
                 <a href="#" class="nav-item" data-page="viewer">
                     <span>📊</span> Raw Table Viewer
                 </a>
+                <a href="#" class="nav-item" data-page="profile">
+                    <span>🔍</span> Player Profiles
+                </a>
             </nav>
         </aside>
 
@@ -140,6 +143,25 @@
                         <button id="btnQuery" class="btn btn-primary">Query Table</button>
                     </div>
                     <div id="tableResults" class="table-container"></div>
+                </div>
+            </div>
+
+            <!-- Player Profile Page -->
+            <div id="page-profile" class="page">
+                <h2>Player Profile Search</h2>
+                <p class="subtitle">Search for player profiles and statistics</p>
+
+                <div class="card">
+                    <h3>Search Players</h3>
+                    <div class="profile-search">
+                        <input type="text" id="profileSearch" class="search-input" placeholder="Enter player name or email..." />
+                        <button id="btnSearchProfile" class="btn btn-primary">Search</button>
+                    </div>
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+
+                <div id="profileCard" class="card" style="display:none;">
+                    <div id="profileContent"></div>
                 </div>
             </div>
         </main>

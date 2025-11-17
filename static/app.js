@@ -536,6 +536,195 @@ async function grantItem() {
     }
 }
 
+// ============= PLAYER PROFILE SEARCH =============
+
+/**
+ * Search for players
+ */
+async function searchPlayerProfiles() {
+    const searchTerm = document.getElementById('profileSearch').value.trim();
+    
+    if (!searchTerm) {
+        showToast('Please enter a search term', 'error');
+        return;
+    }
+    
+    const result = await apiGet(`/player/search?q=${encodeURIComponent(searchTerm)}`);
+    if (!result) return;
+    
+    displaySearchResults(result.players);
+}
+
+/**
+ * Display search results
+ */
+function displaySearchResults(players) {
+    const container = document.getElementById('searchResults');
+    
+    if (!players || players.length === 0) {
+        container.innerHTML = '<div class="empty-state">No players found</div>';
+        return;
+    }
+    
+    let html = '';
+    players.forEach(player => {
+        html += `
+            <div class="search-result-item" onclick="viewPlayerProfile(${player.player_id})">
+                <div class="search-result-info">
+                    <strong>${player.display_name}</strong><br/>
+                    <span style="color: #718096;">${player.email}</span>
+                </div>
+                <div class="search-result-mmr">MMR: ${player.rank_mmr}</div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+/**
+ * View player profile
+ */
+async function viewPlayerProfile(playerId) {
+    const result = await apiGet(`/player/${playerId}/profile`);
+    if (!result) return;
+    
+    displayPlayerProfile(result);
+    document.getElementById('profileCard').style.display = 'block';
+    document.getElementById('profileCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+/**
+ * Display player profile
+ */
+function displayPlayerProfile(data) {
+    const container = document.getElementById('profileContent');
+    const player = data.player;
+    const stats = data.stats;
+    const matches = data.matches;
+    const characters = data.characters;
+    
+    // Calculate win rate
+    const winRate = stats.total_matches > 0 
+        ? ((stats.wins / stats.total_matches) * 100).toFixed(1) 
+        : 0;
+    
+    // Calculate KDA ratio
+    const kdaRatio = stats.avg_deaths > 0
+        ? ((stats.avg_kills + stats.avg_assists) / stats.avg_deaths).toFixed(2)
+        : (stats.avg_kills + stats.avg_assists).toFixed(2);
+    
+    let html = `
+        <div class="profile-header">
+            <h3>${player.display_name}</h3>
+            <p>${player.email}</p>
+            <div class="profile-header-info">
+                <div class="profile-header-stat">
+                    <span class="profile-header-stat-value">${player.rank_mmr}</span>
+                    <span class="profile-header-stat-label">MMR</span>
+                </div>
+                <div class="profile-header-stat">
+                    <span class="profile-header-stat-value">${stats.total_matches || 0}</span>
+                    <span class="profile-header-stat-label">Matches</span>
+                </div>
+                <div class="profile-header-stat">
+                    <span class="profile-header-stat-value">${winRate}%</span>
+                    <span class="profile-header-stat-label">Win Rate</span>
+                </div>
+                <div class="profile-header-stat">
+                    <span class="profile-header-stat-value">${kdaRatio}</span>
+                    <span class="profile-header-stat-label">KDA Ratio</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-stats-grid">
+            <div class="profile-stat-box">
+                <span class="profile-stat-box-value">${stats.wins || 0}W ${stats.losses || 0}L</span>
+                <span class="profile-stat-box-label">Wins/Losses</span>
+            </div>
+            <div class="profile-stat-box">
+                <span class="profile-stat-box-value">${stats.avg_kills || 0} / ${stats.avg_deaths || 0} / ${stats.avg_assists || 0}</span>
+                <span class="profile-stat-box-label">Avg K/D/A</span>
+            </div>
+            <div class="profile-stat-box">
+                <span class="profile-stat-box-value">${stats.avg_damage || 0}</span>
+                <span class="profile-stat-box-label">Avg Damage</span>
+            </div>
+            <div class="profile-stat-box">
+                <span class="profile-stat-box-value">${stats.avg_healing || 0}</span>
+                <span class="profile-stat-box-label">Avg Healing</span>
+            </div>
+        </div>
+    `;
+    
+    // Favorite Characters
+    if (characters && characters.length > 0) {
+        html += `
+            <div class="profile-section">
+                <h4>Most Played Characters</h4>
+                <div class="character-stats">
+        `;
+        characters.forEach(char => {
+            const charWinRate = char.times_played > 0
+                ? ((char.wins / char.times_played) * 100).toFixed(0)
+                : 0;
+            html += `
+                <div class="character-stat-item">
+                    <div class="character-stat-name">${char.character_name}</div>
+                    <div class="character-stat-plays">${char.times_played} games</div>
+                    <div class="character-stat-winrate">${charWinRate}% WR</div>
+                </div>
+            `;
+        });
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
+    // Match History
+    if (matches && matches.length > 0) {
+        html += `
+            <div class="profile-section">
+                <h4>Recent Match History</h4>
+        `;
+        matches.forEach(match => {
+            const mmrClass = match.mmr_delta >= 0 ? 'positive' : 'negative';
+            const mmrSign = match.mmr_delta >= 0 ? '+' : '';
+            html += `
+                <div class="match-history-item ${match.result}">
+                    <div class="match-history-info">
+                        <span class="match-history-character">${match.character_name}</span> - 
+                        <span style="text-transform: capitalize; font-weight: 600;">${match.result}</span><br/>
+                        <span class="match-history-kda">${match.kills}/${match.deaths}/${match.assists}</span> KDA - 
+                        <span style="color: #718096;">${match.gamemode} - ${match.started_at}</span>
+                    </div>
+                    <div class="match-history-mmr ${mmrClass}">${mmrSign}${match.mmr_delta} MMR</div>
+                </div>
+            `;
+        });
+        html += `
+            </div>
+        `;
+    } else {
+        html += '<div class="empty-state">No match history available</div>';
+    }
+    
+    container.innerHTML = html;
+}
+
+/**
+ * Search on enter key
+ */
+function setupProfileSearchEnter() {
+    document.getElementById('profileSearch').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchPlayerProfiles();
+        }
+    });
+}
+
 // ============= EVENT LISTENERS =============
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -561,6 +750,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Items & Entitlements
     document.getElementById('btnGrantItem').addEventListener('click', grantItem);
+    
+    // Player Profile Search
+    document.getElementById('btnSearchProfile').addEventListener('click', searchPlayerProfiles);
+    setupProfileSearchEnter();
     
     // Initial load
     loadTables();

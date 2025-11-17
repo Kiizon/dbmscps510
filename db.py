@@ -255,3 +255,88 @@ def grant_entitlement(player_id, item_id, quantity=1):
     """
     exec_query(txn_query, (player_id, item_id, quantity))
 
+# ============= PLAYER PROFILE QUERIES =============
+
+def search_players(search_term):
+    """Search for players by display name or email."""
+    query = """
+    SELECT player_id, display_name, email, rank_mmr, created_at
+    FROM player
+    WHERE display_name LIKE ? OR email LIKE ?
+    ORDER BY rank_mmr DESC
+    LIMIT 20;
+    """
+    term = f"%{search_term}%"
+    return exec_query(query, (term, term), fetch=True)
+
+def get_player_profile(player_id):
+    """Get detailed player profile with statistics."""
+    # Get basic player info
+    player_query = "SELECT * FROM player WHERE player_id = ?;"
+    player = exec_query(player_query, (player_id,), fetch=True)
+    
+    if not player:
+        return None
+    
+    # Get match statistics
+    stats_query = """
+    SELECT 
+        COUNT(DISTINCT mp.match_id) as total_matches,
+        SUM(CASE WHEN mp.result = 'win' THEN 1 ELSE 0 END) as wins,
+        SUM(CASE WHEN mp.result = 'loss' THEN 1 ELSE 0 END) as losses,
+        CAST(AVG(mps.kills) AS INTEGER) as avg_kills,
+        CAST(AVG(mps.deaths) AS INTEGER) as avg_deaths,
+        CAST(AVG(mps.assists) AS INTEGER) as avg_assists,
+        CAST(AVG(mps.damage_dealt) AS INTEGER) as avg_damage,
+        CAST(AVG(mps.healing_done) AS INTEGER) as avg_healing
+    FROM match_player mp
+    LEFT JOIN match_player_stats mps ON mp.match_player_id = mps.match_player_id
+    WHERE mp.player_id = ?;
+    """
+    stats = exec_query(stats_query, (player_id,), fetch=True)
+    
+    # Get recent matches
+    matches_query = """
+    SELECT 
+        mg.match_id,
+        mg.gamemode,
+        mg.started_at,
+        gc.name as character_name,
+        mp.result,
+        mps.kills,
+        mps.deaths,
+        mps.assists,
+        mps.damage_dealt,
+        mps.mmr_delta
+    FROM match_player mp
+    JOIN match_game mg ON mp.match_id = mg.match_id
+    JOIN game_character gc ON mp.character_id = gc.character_id
+    LEFT JOIN match_player_stats mps ON mp.match_player_id = mps.match_player_id
+    WHERE mp.player_id = ?
+    ORDER BY mg.started_at DESC
+    LIMIT 10;
+    """
+    matches = exec_query(matches_query, (player_id,), fetch=True)
+    
+    # Get favorite characters
+    characters_query = """
+    SELECT 
+        gc.name as character_name,
+        COUNT(*) as times_played,
+        SUM(CASE WHEN mp.result = 'win' THEN 1 ELSE 0 END) as wins
+    FROM match_player mp
+    JOIN game_character gc ON mp.character_id = gc.character_id
+    WHERE mp.player_id = ?
+    GROUP BY gc.character_id
+    ORDER BY times_played DESC
+    LIMIT 5;
+    """
+    characters = exec_query(characters_query, (player_id,), fetch=True)
+    
+    return {
+        'player': player[0],
+        'stats': stats[0] if stats else {},
+        'matches': matches,
+        'characters': characters
+    }
+

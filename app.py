@@ -244,5 +244,35 @@ def grant_entitlement():
     except Exception as e:
         return jsonify({'ok': False, 'message': str(e)}), 500
 
+# ============= PLAYER PROFILE ROUTES =============
+
+@app.route('/player/search', methods=['GET'])
+def search_players():
+    """
+    Search for players by name or email.
+    """
+    try:
+        search_term = request.args.get('q', '')
+        if not search_term:
+            return jsonify({'ok': False, 'message': 'Search term required'}), 400
+        
+        players = db.search_players(search_term)
+        return jsonify({'ok': True, 'players': players})
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)}), 500
+
+@app.route('/player/<int:player_id>/profile', methods=['GET'])
+def get_player_profile(player_id):
+    """
+    Get detailed player profile with stats and match history.
+    """
+    try:
+        profile = db.get_player_profile(player_id)
+        if not profile:
+            return jsonify({'ok': False, 'message': 'Player not found'}), 404
+        return jsonify({'ok': True, **profile})
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
