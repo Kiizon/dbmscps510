@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOBA Game Dashboard - CPS510</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>MOBA Dashboard</h1>
+                <p>CPS510 Project</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="admin">
+                    <span>⚙️</span> Schema Admin
+                </a>
+                <a href="#" class="nav-item" data-page="players">
+                    <span>👥</span> Players
+                </a>
+                <a href="#" class="nav-item" data-page="matches">
+                    <span>🎮</span> Matches
+                </a>
+                <a href="#" class="nav-item" data-page="items">
+                    <span>🎁</span> Items & Entitlements
+                </a>
+                <a href="#" class="nav-item" data-page="viewer">
+                    <span>📊</span> Raw Table Viewer
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Schema Admin Page -->
+            <div id="page-admin" class="page active">
+                <h2>Schema Administration</h2>
+                <p class="subtitle">Manage database schema and seed data</p>
+                
+                <div class="button-row">
+                    <button id="btnDrop" class="btn btn-danger">Drop All Tables</button>
+                    <button id="btnCreate" class="btn btn-primary">Create Tables</button>
+                    <button id="btnSeed" class="btn btn-success">Populate Sample Data</button>
+                </div>
+
+                <div class="info-box">
+                    <h3>Instructions</h3>
+                    <ol>
+                        <li>Click <strong>Create Tables</strong> to initialize the database schema</li>
+                        <li>Click <strong>Populate Sample Data</strong> to add sample game data</li>
+                        <li>Use the navigation to manage players, matches, and items</li>
+                        <li>Use <strong>Drop All Tables</strong> to reset the database (caution!)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Players Page -->
+            <div id="page-players" class="page">
+                <h2>Player Management</h2>
+                <p class="subtitle">View and manage player accounts</p>
+
+                <div class="card">
+                    <h3>Add/Edit Player</h3>
+                    <div class="crud-form">
+                        <input type="hidden" id="playerIdEdit" />
+                        <input type="text" id="playerDisplayName" placeholder="Display Name" required />
+                        <input type="email" id="playerEmail" placeholder="Email" required />
+                        <input type="text" id="playerPasswordHash" placeholder="Password Hash" required />
+                        <input type="number" id="playerRankMmr" placeholder="Rank MMR" value="1000" />
+                        <button id="btnSavePlayer" class="btn btn-primary">Save Player</button>
+                        <button id="btnCancelPlayer" class="btn btn-secondary" style="display:none;">Cancel</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>All Players</h3>
+                    <div id="playerList" class="data-list"></div>
+                </div>
+            </div>
+
+            <!-- Matches Page -->
+            <div id="page-matches" class="page">
+                <h2>Match Management</h2>
+                <p class="subtitle">View game matches, teams, and player participation</p>
+
+                <div class="card">
+                    <h3>All Matches</h3>
+                    <div id="matchList" class="data-list"></div>
+                </div>
+
+                <div class="card" id="matchDetails" style="display:none;">
+                    <h3>Match Details</h3>
+                    <div id="matchDetailsContent"></div>
+                </div>
+            </div>
+
+            <!-- Items & Entitlements Page -->
+            <div id="page-items" class="page">
+                <h2>Items & Entitlements</h2>
+                <p class="subtitle">Manage items and player entitlements</p>
+
+                <div class="card">
+                    <h3>Grant Item to Player</h3>
+                    <div class="crud-form">
+                        <select id="grantPlayerId" class="select">
+                            <option value="">-- Select Player --</option>
+                        </select>
+                        <select id="grantItemId" class="select">
+                            <option value="">-- Select Item --</option>
+                        </select>
+                        <input type="number" id="grantQuantity" placeholder="Quantity" value="1" min="1" />
+                        <button id="btnGrantItem" class="btn btn-primary">Grant Item</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>All Items</h3>
+                    <div id="itemList" class="data-list"></div>
+                </div>
+
+                <div class="card">
+                    <h3>Player Entitlements</h3>
+                    <div id="entitlementList" class="data-list"></div>
+                </div>
+            </div>
+
+            <!-- Raw Table Viewer Page -->
+            <div id="page-viewer" class="page">
+                <h2>Raw Table Viewer</h2>
+                <p class="subtitle">Query and view any table directly</p>
+
+                <div class="card">
+                    <div class="browser-controls">
+                        <select id="tableSelect" class="select">
+                            <option value="">-- Select a table --</option>
+                        </select>
+                        <button id="btnQuery" class="btn btn-primary">Query Table</button>
+                    </div>
+                    <div id="tableResults" class="table-container"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Toast Notification -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
