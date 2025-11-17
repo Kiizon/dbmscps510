@@ -10,9 +10,16 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     """
-    Main dashboard page.
+    Main admin dashboard page.
     """
     return render_template('index.html')
+
+@app.route('/player')
+def player_dashboard():
+    """
+    Player-facing stats and profile search page.
+    """
+    return render_template('player.html')
 
 @app.route('/drop', methods=['POST'])
 def drop():

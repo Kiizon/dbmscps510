@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOBA Player Stats</title>
+    <link rel="stylesheet" href="/static/player.css">
+</head>
+<body>
+    <div class="player-dashboard">
+        <!-- Header -->
+        <header class="player-header">
+            <div class="container">
+                <h1>MOBA Player Stats</h1>
+                <p>Search for player profiles and statistics</p>
+                <a href="/" class="admin-link">Admin Dashboard →</a>
+            </div>
+        </header>
+
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="container">
+                <div class="search-box">
+                    <input type="text" id="playerSearch" placeholder="Search by player name or email..." />
+                    <button id="btnSearch" class="search-btn">Search</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Search Results -->
+        <section id="searchResultsSection" class="results-section" style="display:none;">
+            <div class="container">
+                <h2>Search Results</h2>
+                <div id="searchResults"></div>
+            </div>
+        </section>
+
+        <!-- Player Profile -->
+        <section id="profileSection" class="profile-section" style="display:none;">
+            <div class="container">
+                <div id="profileContent"></div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="player-footer">
+            <div class="container">
+                <p>&copy; 2024 MOBA Game Database - CPS510 Project</p>
+            </div>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast"></div>
+    <script src="/static/player.js"></script>
+</body>
+</html>
+
