@@ -287,6 +287,227 @@ function closeMatchModal() {
     document.getElementById('matchModal').style.display = 'none';
 }
 
+// ============= SECTION NAVIGATION =============
+
+function showSection(section) {
+    // Update header nav links
+    document.querySelectorAll('.header-nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Show/hide sections
+    if (section === 'search') {
+        document.getElementById('playerSearchSection').style.display = 'block';
+        document.getElementById('browseSection').style.display = 'none';
+    } else if (section === 'browse') {
+        document.getElementById('playerSearchSection').style.display = 'none';
+        document.getElementById('browseSection').style.display = 'block';
+        loadCharacters();
+    }
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function showBrowseTab(tab) {
+    // Update tab buttons
+    document.querySelectorAll('.browse-tab').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Show/hide tab content
+    document.querySelectorAll('.browse-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+    
+    if (tab === 'characters') {
+        document.getElementById('charactersTab').classList.add('active');
+        loadCharacters();
+    } else if (tab === 'items') {
+        document.getElementById('itemsTab').classList.add('active');
+        loadItems();
+    }
+}
+
+// ============= CHARACTERS =============
+
+async function loadCharacters() {
+    const container = document.getElementById('charactersGrid');
+    
+    // Check if already loaded
+    if (container.innerHTML) return;
+    
+    const result = await apiGet('/characters');
+    if (!result) return;
+    
+    displayCharacters(result.characters);
+}
+
+function displayCharacters(characters) {
+    const container = document.getElementById('charactersGrid');
+    
+    if (!characters || characters.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🎭</div><div class="empty-state-text">No characters found</div></div>';
+        return;
+    }
+    
+    let html = '';
+    characters.forEach(char => {
+        html += `
+            <div class="character-card-browse" onclick="viewCharacterDetails(${char.character_id})">
+                <div class="character-card-header">
+                    <div class="character-card-name">${char.name}</div>
+                    <div class="character-card-role">${char.role_name}</div>
+                </div>
+                <div class="character-card-stats">
+                    <div class="character-stat-row">
+                        <span class="character-stat-label">Health:</span>
+                        <span class="character-stat-value">${char.base_health}</span>
+                    </div>
+                    <div class="character-stat-row">
+                        <span class="character-stat-label">Attack Power:</span>
+                        <span class="character-stat-value">${char.attack_power}</span>
+                    </div>
+                    <div class="character-stat-row">
+                        <span class="character-stat-label">Attack Speed:</span>
+                        <span class="character-stat-value">${char.attack_speed}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+async function viewCharacterDetails(characterId) {
+    const result = await apiGet(`/character/${characterId}`);
+    if (!result) return;
+    
+    displayCharacterModal(result);
+}
+
+function displayCharacterModal(data) {
+    const char = data.character;
+    const abilities = data.abilities;
+    const stats = data.stats;
+    
+    const winRate = stats.times_played > 0 
+        ? ((stats.wins / stats.times_played) * 100).toFixed(1) 
+        : 0;
+    
+    let html = `
+        <div class="match-modal-header">
+            <h3>${char.name}</h3>
+            <p>${char.role_name} - ${char.role_description}</p>
+            <button class="modal-close" onclick="closeCharacterModal()">×</button>
+        </div>
+        <div class="match-modal-content">
+            <div class="team-section">
+                <h4>Base Stats</h4>
+                <div class="team-players">
+                    <div class="modal-player-card">
+                        <div class="modal-player-stats">
+                            <span><strong>Health:</strong> ${char.base_health}</span>
+                            <span><strong>Attack Power:</strong> ${char.attack_power}</span>
+                            <span><strong>Attack Speed:</strong> ${char.attack_speed}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    `;
+    
+    if (abilities && abilities.length > 0) {
+        html += `
+            <div class="team-section">
+                <h4>Abilities</h4>
+                <div class="team-players">
+        `;
+        abilities.forEach(ability => {
+            html += `
+                <div class="modal-player-card">
+                    <div class="modal-player-name">${ability.name}</div>
+                    <div class="modal-player-character">${ability.slot} - ${ability.type}</div>
+                    <div class="modal-player-stats">
+                        <span><strong>Power:</strong> ${ability.power}</span>
+                        <span><strong>Cooldown:</strong> ${ability.cooldown_s}s</span>
+                    </div>
+                </div>
+            `;
+        });
+        html += `</div></div>`;
+    }
+    
+    if (stats.times_played > 0) {
+        html += `
+            <div class="team-section">
+                <h4>Play Statistics</h4>
+                <div class="team-players">
+                    <div class="modal-player-card">
+                        <div class="modal-player-stats">
+                            <span><strong>Times Played:</strong> ${stats.times_played}</span>
+                            <span><strong>Win Rate:</strong> ${winRate}% (${stats.wins}W - ${stats.losses}L)</span>
+                            <span><strong>Avg K/D/A:</strong> ${stats.avg_kills}/${stats.avg_deaths}/${stats.avg_assists}</span>
+                            <span><strong>Avg Damage:</strong> ${stats.avg_damage}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    html += `</div>`;
+    
+    const modal = document.getElementById('characterModal');
+    const modalContent = document.getElementById('characterModalContent');
+    modalContent.innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+function closeCharacterModal() {
+    document.getElementById('characterModal').style.display = 'none';
+}
+
+// ============= ITEMS =============
+
+async function loadItems() {
+    const container = document.getElementById('itemsGrid');
+    
+    // Check if already loaded
+    if (container.innerHTML) return;
+    
+    const result = await apiGet('/items/all');
+    if (!result) return;
+    
+    displayItems(result.items);
+}
+
+function displayItems(items) {
+    const container = document.getElementById('itemsGrid');
+    
+    if (!items || items.length === 0) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📦</div><div class="empty-state-text">No items found</div></div>';
+        return;
+    }
+    
+    let html = '';
+    items.forEach(item => {
+        html += `
+            <div class="item-card-browse">
+                <div class="item-card-name">${item.name}</div>
+                <div class="item-card-meta">
+                    <span class="item-category">${item.category}</span>
+                    <span class="item-rarity ${item.rarity}">${item.rarity}</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
 // ============= EVENT LISTENERS =============
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -300,17 +521,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Close modal when clicking outside
+    // Close match modal when clicking outside
     document.getElementById('matchModal').addEventListener('click', function(e) {
         if (e.target === this) {
             closeMatchModal();
         }
     });
-    
-    // Close modal with Escape key
+
+    // Close character modal when clicking outside
+    document.getElementById('characterModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeCharacterModal();
+        }
+    });
+
+    // Close modals with Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeMatchModal();
+            closeCharacterModal();
         }
     });
 });

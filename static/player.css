@@ -36,9 +36,35 @@ body {
     opacity: 0.9;
 }
 
+.header-nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.header-nav-link {
+    color: white;
+    text-decoration: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.3s;
+    font-weight: 600;
+    background: rgba(255,255,255,0.1);
+}
+
+.header-nav-link:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.header-nav-link.active {
+    background: white;
+    color: #667eea;
+}
+
 .admin-link {
     display: inline-block;
-    margin-top: 15px;
     color: white;
     text-decoration: none;
     padding: 8px 16px;
@@ -46,11 +72,17 @@ body {
     border-radius: 6px;
     transition: all 0.3s;
     font-weight: 600;
+    margin-left: auto;
 }
 
 .admin-link:hover {
     background: white;
     color: #667eea;
+}
+
+/* Main Sections */
+.main-section {
+    min-height: 60vh;
 }
 
 /* Search Section */
@@ -380,6 +412,188 @@ body {
 .match-mmr.negative {
     background: #f56565;
     color: white;
+}
+
+/* Browse Section */
+.browse-tabs-section {
+    padding: 40px 0 80px;
+}
+
+.browse-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.browse-tab {
+    padding: 15px 30px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #718096;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.browse-tab:hover {
+    color: #667eea;
+}
+
+.browse-tab.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+}
+
+.browse-tab-content {
+    display: none;
+}
+
+.browse-tab-content.active {
+    display: block;
+}
+
+.browse-tab-content h2 {
+    font-size: 1.8em;
+    margin-bottom: 25px;
+    color: #2d3748;
+}
+
+/* Characters Grid */
+#charactersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.character-card-browse {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid #e2e8f0;
+}
+
+.character-card-browse:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    border-color: #667eea;
+}
+
+.character-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.character-card-name {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: #2d3748;
+}
+
+.character-card-role {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.character-card-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: #4a5568;
+}
+
+.character-stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95em;
+}
+
+.character-stat-label {
+    color: #718096;
+}
+
+.character-stat-value {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+/* Items Grid */
+#itemsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.item-card-browse {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s;
+}
+
+.item-card-browse:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    border-color: #667eea;
+}
+
+.item-card-name {
+    font-size: 1.3em;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 10px;
+}
+
+.item-card-meta {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.item-category, .item-rarity {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.item-category {
+    background: #edf2f7;
+    color: #4a5568;
+}
+
+.item-rarity {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.item-rarity.common {
+    background: #718096;
+}
+
+.item-rarity.rare {
+    background: #4299e1;
+}
+
+.item-rarity.epic {
+    background: #9f7aea;
+}
+
+.item-rarity.legendary {
+    background: linear-gradient(135deg, #f6ad55, #ed8936);
 }
 
 /* Empty State */

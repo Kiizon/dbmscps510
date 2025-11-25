@@ -281,5 +281,42 @@ def get_player_profile(player_id):
     except Exception as e:
         return jsonify({'ok': False, 'message': str(e)}), 500
 
+# ============= GAME DATA ROUTES =============
+
+@app.route('/characters', methods=['GET'])
+def get_characters():
+    """
+    Get all characters with their role and stats.
+    """
+    try:
+        characters = db.get_all_characters()
+        return jsonify({'ok': True, 'characters': characters})
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)}), 500
+
+@app.route('/character/<int:character_id>', methods=['GET'])
+def get_character_details(character_id):
+    """
+    Get detailed character information with abilities.
+    """
+    try:
+        character = db.get_character_details(character_id)
+        if not character:
+            return jsonify({'ok': False, 'message': 'Character not found'}), 404
+        return jsonify({'ok': True, **character})
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)}), 500
+
+@app.route('/items/all', methods=['GET'])
+def get_all_items():
+    """
+    Get all items with categories and rarities.
+    """
+    try:
+        items = db.get_all_items()
+        return jsonify({'ok': True, 'items': items})
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

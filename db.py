@@ -340,3 +340,85 @@ def get_player_profile(player_id):
         'characters': characters
     }
 
+# ============= GAME DATA QUERIES =============
+
+def get_all_characters():
+    """Get all characters with their roles and stats."""
+    query = """
+    SELECT 
+        gc.character_id,
+        gc.name,
+        gr.name as role_name,
+        gc.base_health,
+        gc.attack_power,
+        gc.attack_speed
+    FROM game_character gc
+    JOIN game_role gr ON gc.role_id = gr.role_id
+    ORDER BY gr.name, gc.name;
+    """
+    return exec_query(query, fetch=True)
+
+def get_character_details(character_id):
+    """Get detailed character information with abilities."""
+    # Get character info
+    char_query = """
+    SELECT 
+        gc.character_id,
+        gc.name,
+        gr.name as role_name,
+        gr.description as role_description,
+        gc.base_health,
+        gc.attack_power,
+        gc.attack_speed
+    FROM game_character gc
+    JOIN game_role gr ON gc.role_id = gr.role_id
+    WHERE gc.character_id = ?;
+    """
+    character = exec_query(char_query, (character_id,), fetch=True)
+    
+    if not character:
+        return None
+    
+    # Get character abilities
+    abilities_query = """
+    SELECT 
+        a.ability_id,
+        a.name,
+        a.type,
+        a.power,
+        a.cooldown_s,
+        ca.slot
+    FROM character_ability ca
+    JOIN ability a ON ca.ability_id = a.ability_id
+    WHERE ca.character_id = ?
+    ORDER BY 
+        CASE ca.slot 
+            WHEN 'primary' THEN 1 
+            WHEN 'secondary' THEN 2 
+            WHEN 'tertiary' THEN 3 
+        END;
+    """
+    abilities = exec_query(abilities_query, (character_id,), fetch=True)
+    
+    # Get play statistics
+    stats_query = """
+    SELECT 
+        COUNT(DISTINCT mp.match_id) as times_played,
+        SUM(CASE WHEN mp.result = 'win' THEN 1 ELSE 0 END) as wins,
+        SUM(CASE WHEN mp.result = 'loss' THEN 1 ELSE 0 END) as losses,
+        CAST(AVG(mps.kills) AS INTEGER) as avg_kills,
+        CAST(AVG(mps.deaths) AS INTEGER) as avg_deaths,
+        CAST(AVG(mps.assists) AS INTEGER) as avg_assists,
+        CAST(AVG(mps.damage_dealt) AS INTEGER) as avg_damage
+    FROM match_player mp
+    LEFT JOIN match_player_stats mps ON mp.match_player_id = mps.match_player_id
+    WHERE mp.character_id = ?;
+    """
+    stats = exec_query(stats_query, (character_id,), fetch=True)
+    
+    return {
+        'character': character[0],
+        'abilities': abilities,
+        'stats': stats[0] if stats else {}
+    }
+
